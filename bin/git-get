@@ -29,7 +29,7 @@ if (!defined $cmd || !$cmd) {
 } elsif ($cmd eq "install") {
     install(@args);
 } elsif ($cmd eq "listall") {
-    my @pkgs = sort keys %PKGS;
+    my @pkgs = sort keys %$PKGS;
     print("$_\n") foreach @pkgs;
 } else {
     die("git-get: No such command: $cmd\n");
