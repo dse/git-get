@@ -61,7 +61,7 @@ sub install {
         }
 
         my @make_install = @{$PKG->{"make-install"}};
-        if (@make_install) {
+        if (!@make_install) {
             @make_install = ("make", "install");
         }
         if (-x "/usr/bin/cygcheck") {
