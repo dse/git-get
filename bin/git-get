@@ -13,6 +13,9 @@ my $PKGS = {
     },
     'apt-cyg' => {
         'repos' => 'git@github.com:transcode-open/apt-cyg.git',
+        'make-install' => [
+            '/usr/bin/install', '-m0755', 'apt-cyg', '/usr/local/bin/apt-cyg'
+        ],
     },
     'daterange' => {
         'repos' => 'git@github.com:dse/daterange.git',
@@ -46,20 +49,28 @@ sub install {
         print("chdir $GITGET_HOME\n");
         chdir($GITGET_HOME) or die("git-get: chdir $GITGET_HOME failed.\n");
         if (!-d $pkg) {
+            print("git clone $PKG->{repos} $pkg\n");
             system("git", "clone", $PKG->{repos}, "$pkg") and die("git-get: git clone $PKG->{repos} $pkg failed.\n");
             print("chdir $pkg\n");
             chdir($pkg) or die("git-get: chdir $pkg failed.\n");
         } else {
             print("chdir $pkg\n");
             chdir($pkg) or die("git-get: chdir $pkg failed.\n");
+            print("git pull --rebase origin master\n");
             system("git", "pull", "--rebase", "origin", "master") and die("git-get: git pull --rebase failed.\n");
         }
-        if (-x "/usr/bin/cygcheck") {
-            system("make", "install") and die("git-get: make install failed.\n");
-        } else {
-            system("sudo", "make", "install") and die("git-get: make install failed.\n");
+
+        my @make_install = @{$PKG->{"make-install"}};
+        if (@make_install) {
+            @make_install = ("make", "install");
         }
-          
+        if (-x "/usr/bin/cygcheck") {
+            print("@make_install\n");
+            system(@make_install) and die("git-get: make install failed.\n");
+        } else {
+            print("sudo @make_install\n");
+            system("sudo", @make_install) and die("git-get: make install failed.\n");
+        }
     }
 }
 
