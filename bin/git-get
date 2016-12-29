@@ -6,25 +6,27 @@ my $GITGET_HOME = $ENV{GITGET_HOME} // "$ENV{HOME}/git";
 
 my $PKGS = {
     'tdu' => {
-        repos => 'git@github.com:dse/tdu.git',
+        'repos' => 'git@github.com:dse/tdu.git',
     },
     'vtclock' => {
-        repos => 'git@github.com:dse/vtclock.git',
+        'repos' => 'git@github.com:dse/vtclock.git',
     },
     'apt-cyg' => {
-        repos => 'git@github.com:transcode-open/apt-cyg.git',
+        'repos' => 'git@github.com:transcode-open/apt-cyg.git',
     },
     'daterange' => {
-        repos => 'git@github.com:dse/daterange.git',
+        'repos' => 'git@github.com:dse/daterange.git',
     }
 };
 
 my ($cmd, @args) = @ARGV;
 
-if ($cmd eq "install") {
+if (!defined $cmd || !$cmd) {
+    die("git-get: No command specified\n");
+} elsif ($cmd eq "install") {
     install(@args);
 } else {
-    die("No such command: $cmd\n");
+    die("git-get: No such command: $cmd\n");
 }
 
 sub install {
@@ -32,18 +34,21 @@ sub install {
     foreach my $pkg (@pkgs) {
         my $PKG = $PKGS->{$pkg};
         if (!$PKG) {
-            warn("No such package: $pkg\n");
+            warn("git-get: No such package: $pkg\n");
+            next;
         }
         print("chdir $GITGET_HOME\n");
-        chdir($GITGET_HOME) or die("chdir $GITGET_HOME failed.\n");
+        chdir($GITGET_HOME) or die("git-get: chdir $GITGET_HOME failed.\n");
         if (!-d $pkg) {
-            system("git", "clone", $PKG->{repos}, "$pkg") and die("git clone $PKG->{repos} $pkg failed.\n");
+            system("git", "clone", $PKG->{repos}, "$pkg") and die("git-get: git clone $PKG->{repos} $pkg failed.\n");
+            print("chdir $pkg\n");
+            chdir($pkg) or die("git-get: chdir $pkg failed.\n");
         } else {
-            system("git", "pull", "--rebase") and die("git pull --rebase failed.\n");
+            print("chdir $pkg\n");
+            chdir($pkg) or die("git-get: chdir $pkg failed.\n");
+            system("git", "pull", "--rebase") and die("git-get: git pull --rebase failed.\n");
         }
-        print("chdir $pkg\n");
-        chdir($pkg) or die("chdir $pkg failed.\n");
-        system("make", "install") and die("make install failed.\n");
+        system("make", "install") and die("git-get: make install failed.\n");
     }
 }
 
