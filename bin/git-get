@@ -54,7 +54,12 @@ sub install {
             chdir($pkg) or die("git-get: chdir $pkg failed.\n");
             system("git", "pull", "--rebase", "origin", "master") and die("git-get: git pull --rebase failed.\n");
         }
-        system("sudo", "make", "install") and die("git-get: make install failed.\n");
+        if (-x "/usr/bin/cygcheck") {
+            system("make", "install") and die("git-get: make install failed.\n");
+        } else {
+            system("sudo", "make", "install") and die("git-get: make install failed.\n");
+        }
+          
     }
 }
 
