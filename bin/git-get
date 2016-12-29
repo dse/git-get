@@ -60,7 +60,7 @@ sub install {
             system("git", "pull", "--rebase", "origin", "master") and die("git-get: git pull --rebase failed.\n");
         }
 
-        my @make_install = @{$PKG->{"make-install"}};
+        my @make_install = @{$PKG->{"make-install"} // []};
         if (!@make_install) {
             @make_install = ("make", "install");
         }
