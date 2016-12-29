@@ -28,6 +28,9 @@ if (!defined $cmd || !$cmd) {
     die("git-get: No command specified\n");
 } elsif ($cmd eq "install") {
     install(@args);
+} elsif ($cmd eq "listall") {
+    my @pkgs = sort keys %PKGS;
+    print("$_\n") foreach @pkgs;
 } else {
     die("git-get: No such command: $cmd\n");
 }
