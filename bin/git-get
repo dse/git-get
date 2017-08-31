@@ -23,6 +23,12 @@ my $PKGS = {
     'git-get' => {
         'repos' => 'git@github.com:dse/git-get.git',
     },
+    # 'lesspipe' => {
+    #     'repos' => 'git@github.com:wofr06/lesspipe.git'
+    # },
+    # 'moreutils' => {
+    #     'repos' => 'https://git.kitenet.net/git/moreutils.git'
+    # },
 };
 
 my ($cmd, @args) = @ARGV;
@@ -50,21 +56,25 @@ sub install {
         chdir($GITGET_HOME) or die("git-get: chdir $GITGET_HOME failed.\n");
         if (!-d $pkg) {
             print("git clone $PKG->{repos} $pkg\n");
-            system("git", "clone", $PKG->{repos}, "$pkg") and die("git-get: git clone $PKG->{repos} $pkg failed.\n");
+            system("git", "clone", $PKG->{repos}, "$pkg") and do {
+                die("git-get: git clone $PKG->{repos} $pkg failed.\n");
+            };
             print("chdir $pkg\n");
             chdir($pkg) or die("git-get: chdir $pkg failed.\n");
         } else {
             print("chdir $pkg\n");
             chdir($pkg) or die("git-get: chdir $pkg failed.\n");
             print("git pull --rebase origin master\n");
-            system("git", "pull", "--rebase", "origin", "master") and die("git-get: git pull --rebase failed.\n");
+            system("git", "pull", "--rebase", "origin", "master") and do {
+                die("git-get: git pull --rebase failed.\n");
+            };
         }
 
         my @make_install = @{$PKG->{"make-install"} // []};
         if (!@make_install) {
             @make_install = ("make", "install");
         }
-        if (-x "/usr/bin/cygcheck") {
+        if ($ENV{OSTYPE} eq "cygwin" || -x "/usr/bin/cygcheck") {
             print("@make_install\n");
             system(@make_install) and die("git-get: make install failed.\n");
         } else {
